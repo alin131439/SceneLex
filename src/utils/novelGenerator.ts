@@ -1,0 +1,269 @@
+/**
+ * 小说生成工具
+ * 从 docs 文件夹读取风格文档，词汇来源为文档中提取的单词
+ */
+
+interface GenerateNovelParams {
+  length: "short" | "medium" | "long";
+  theme: string;
+  selectedWords?: string[];
+}
+
+interface GenerateNovelResult {
+  title: string;
+  content: string;
+}
+
+const styleDocs: Record<string, { title: string; content: string; words: Array<{ word: string; definition: string }> }> = {
+  "搞笑": {
+    title: "赞助危机",
+    content: `克里斯蒂亚诺·罗纳尔多向来笃信自己对万事的掌控力（control）——无论是赛场的脉搏、外界的重压（pressure），还是镜头前那副滴水不漏的面具。
+
+可今天，他撞上了一堵比任何后卫都难缠的墙。
+
+——一瓶赞助商提供的矿泉水，死活拧不开。
+
+满屋子的工作人员屏息凝神，空气里浮着一种微妙的难堪（awkwardness）。导演挤出笑脸，说："放轻松，像平时那样就行。"
+
+放轻松。
+
+第一下，瓶盖纹丝不动。
+
+第二下，指腹打滑，力道全泄了。
+
+屋里的沉默开始变得有分量，沉甸甸地压在每个人肩上。有人咬着耳朵嘀咕："会不会是瓶子本身有问题？"
+
+他没搭腔，只把眉心一拧，手背青筋暴起，那股子狠劲儿像是要把决胜球轰进对方大门。
+
+"啪——"一声脆响。
+
+瓶盖弹飞出去，水柱喷涌，溅得一塌糊涂。
+
+现场瞬间炸了锅。摄影师骂了句脏话，一个场务脚底打滑，差点仰面栽倒。
+
+罗纳尔多愣了一秒。然后，他面无表情地把瓶子放回桌上，语气平淡得像在报比分："至少，结果达到了。"
+
+随即，他嘴角一松，露出一个极浅的、稍纵即逝（transient）的笑窝。`,
+    words: [
+      { word: "control", definition: "控制" },
+      { word: "pressure", definition: "压力" },
+      { word: "awkwardness", definition: "难堪" },
+      { word: "transient", definition: "短暂的" },
+    ],
+  },
+  "恐怖": {
+    title: "午夜球场异常",
+    content: `比赛散场许久，克里斯蒂亚诺·罗纳尔多却独自折回了球场。
+
+可这里早已褪去了"场所"的寻常属性。它呈现出一种诡异的空旷（desolation），同时又像被某种看不见的东西塞得满满当当，生出一种令人头皮发麻的饱和感（saturation）。灯光忽明忽灭，整座场馆都在微微震颤，那股不稳定（instability）的劲儿顺着脚底板往上爬。
+
+脚下的草皮平整得过分，像是被人用尺子一寸寸重置过。
+
+然后，他听见了掌声（applause）。
+
+缓慢的，空洞的，节拍全然不似人类。
+
+他猛地回头。身后空无一人。
+
+可看台上，分明"坐满了"。只是那些"满"，不可感知（imperceptible），像空气里浮动的暗影。
+
+他往前走了一步，脚步声（footsteps）却没有同步落下——延迟了半拍，又半拍，像有什么东西在暗处一丝不苟地临摹他的动作。空间开始扭曲（spatial distortion），出口在他眼前拉长、折叠、重新拼接。
+
+一颗球，不知从哪个角落缓缓滚到他脚边。
+
+他没有踢。
+
+球却自己弹了回去。
+
+那一刻，他恍然明白——比赛从未结束。这座球场，是一个持续运转的系统性循环（systemic loop），而他，不过是被困在其中的一枚棋子。`,
+    words: [
+      { word: "desolation", definition: "空旷" },
+      { word: "saturation", definition: "饱和感" },
+      { word: "instability", definition: "不稳定" },
+      { word: "applause", definition: "掌声" },
+      { word: "imperceptible", definition: "不可感知" },
+      { word: "footsteps", definition: "脚步声" },
+      { word: "spatial distortion", definition: "空间扭曲" },
+      { word: "systemic loop", definition: "系统性循环" },
+    ],
+  },
+  "奇幻": {
+    title: "现实扰动者",
+    content: `在维洛里亚王国，克里斯蒂亚诺·罗纳尔多不被称作"球员"，而是一个行走的"现实扰动体"（anomalous entity）。他的每一次迈步，都会令空间结构（spatial structure）发生微妙偏折；他的每一次全神贯注（attentional focus），都会让时间流速（temporal flow）变得粘稠迟滞。
+
+队友艾伦·史密斯初次旁观他训练时，几乎产生了认知失调（cognitive dissonance）——那人只跨出一步，却像同时踏过了半个球场的维度。
+
+"你这是在拆解物理学的根基。"艾伦说。
+
+罗纳尔多连眼皮都没抬："我只是做了自身状态的再校准（recalibration）。"
+
+可真相远比这复杂。当他进入运动状态，现实本身会进入一种自适应重构（adaptive reconstruction）的应激反应——空气为他让路，草皮为他折叠。王国议会将他定义为"结构性异常"（structural anomaly），试图用禁令将他束缚。
+
+可当他踏上竞技场中央，所有规则自动失效。空间为他敞开豁口，时间（time）为他屏住呼吸。
+
+他站在那里，连光都绕着他走。`,
+    words: [
+      { word: "anomalous entity", definition: "异常实体" },
+      { word: "spatial structure", definition: "空间结构" },
+      { word: "attentional focus", definition: "全神贯注" },
+      { word: "temporal flow", definition: "时间流速" },
+      { word: "cognitive dissonance", definition: "认知失调" },
+      { word: "recalibration", definition: "再校准" },
+      { word: "adaptive reconstruction", definition: "自适应重构" },
+      { word: "structural anomaly", definition: "结构性异常" },
+      { word: "time", definition: "时间" },
+    ],
+  },
+  "暧昧": {
+    title: "无题",
+    content: `他和艾伦·史密斯之间那道口子，从来没人缝上过。
+
+不是仇，也不是恩。就是一种悬而未决的张力（tension），像绷紧的弦，没人敢拨，也没人舍得松。
+
+更衣室里只剩他们两个。热水器的嗡鸣声停了，空气里有股汗和除臭剂混出来的锈味。
+
+艾伦靠在柜门上，盯着罗纳尔多一圈一圈绕手腕上的绷带。那动作太慢，慢得不像在做准备，倒像是在拖——拖一件谁都知道迟早要来的事。
+
+"你在躲我。"艾伦说。
+
+罗纳尔多没抬头："我在集中（concentration）。"
+
+"你他妈每次都这么说。"
+
+空气里那股情绪密度（emotional density）陡然攀升，像潮水漫过堤坝前的最后一寸。
+
+罗纳尔多终于抬起眼。那目光不算冷，也不算热，是一种高度聚焦（hyper-focused）的审视，像猎手在判断距离（distance），又像猎物在估算逃生路线。艾伦被他这么一看，喉结不自觉地滚了一下。
+
+他没再说话。直接走过去，膝盖顶开罗纳尔多的腿，手按在他锁骨下方那块微微发烫的皮肤上。
+
+罗纳尔多没有躲。他只是在艾伦俯身咬住他下唇的时候，从鼻腔里哼出一声极轻的、近乎纵容的气音。
+
+"你他妈就是来讨债的。"艾伦贴着嘴角骂了一句，手却已经往下探，指腹碾过绷带边缘那道勒红的印子。
+
+罗纳尔多仰头，脖颈拉出一道脆弱的弧线，凸起的喉结像一枚随时要刺穿皮肤的暗器。他后脑勺抵着冰冷的更衣柜，腰却往前送了几分，把两人之间那点残余的空间变量（variable）彻底归零。
+
+艾伦把他翻过去的时候，他额头抵着柜门，绷带散了半截，垂在身侧晃荡。金属门板映出他模糊的轮廓，颧骨泛着薄红，眼眶湿漉漉的，像被水泡过的琥珀。
+
+"操。"艾伦从后面抵进来，没什么前奏，粗粝得像在完成一项任务（task）。罗纳尔多肩膀缩了一下，脊背弓起来，但没吭声，只是把指尖抠进柜门的缝隙里，指节泛白。
+
+艾伦动了十几下，才后知后觉地发现他在发抖——不是疼的那种，是一种更深的、从骨头缝里渗出来的颤栗（tremor）。
+
+"哭什么。"艾伦哑着嗓子问，速度没减，甚至更重了些，"又不是第一次。"
+
+罗纳尔多没有回答。他只是在某一瞬间猛地仰起头，后颈绷成一张弓，喉咙里挤出一截破碎的、被吞咽过无数次的音节。高潮（climax）来的时候他整个人塌下去，额头磕在柜面上，发出一声闷响。泪腺（lacrimal gland）像被人拧开了开关，湿痕顺着鼻梁滑下来，滴在那截散了架的绷带上。
+
+艾伦没停。他甚至没去看罗纳尔多的脸。他只是闭着眼，把自己埋得更深，在那种规律性的摩擦（friction）里寻找自己的释放。他不关心罗纳尔多为什么哭——从前不关心，现在也不关心。他只关心此刻这种近乎暴烈的、不加修饰的占有（occupancy），是否足够彻底。
+
+完事之后，艾伦抽身退开，拉链一拉，像关上一扇门。罗纳尔多还维持着那个姿势趴了几秒，才慢慢直起身，抬手用绷带残端胡乱擦了把脸。
+
+"走了。"艾伦把外套甩上肩头，走到门口时停了一步，"明天比赛，别迟到。"
+
+门关上。更衣室里只剩罗纳尔多一个人，和他面前那面映着模糊水痕的铁柜门。他低头看了看掌心——有几道被柜缝硌出来的红印子，深浅不一，像某种临时写就的标记（mark）。
+
+他笑了一下。很短，像刀子划过冰面。`,
+    words: [
+      { word: "tension", definition: "张力" },
+      { word: "concentration", definition: "集中" },
+      { word: "emotional density", definition: "情绪密度" },
+      { word: "hyper-focused", definition: "高度聚焦" },
+      { word: "distance", definition: "距离" },
+      { word: "variable", definition: "变量" },
+      { word: "task", definition: "任务" },
+      { word: "tremor", definition: "颤栗" },
+      { word: "climax", definition: "高潮" },
+      { word: "lacrimal gland", definition: "泪腺" },
+      { word: "friction", definition: "摩擦" },
+      { word: "occupancy", definition: "占有" },
+      { word: "mark", definition: "标记" },
+    ],
+  },
+  "治愈": {
+    title: "系统归零之后",
+    content: `终场哨声散尽，世界终于跌入一片低噪状态（low-noise state）。
+
+克里斯蒂亚诺·罗纳尔多没有急着离开。他仰面躺在球场中央，草叶扎着后颈，胸口还在缓缓起伏，任由呼吸节律（respiratory rhythm）一点一点找回自己的拍子。
+
+艾伦·史密斯走过来，没问"还好吗"，也没拍他肩膀。他只是挨着坐下，膝盖并拢，手搭在膝头，像一尊沉默的界碑。
+
+两人之间的沉默不是空洞，而是一种稳定的共存结构（stable structure）。风从看台那头穿过来，草皮上的光影荡开细碎的波纹，形成某种微妙而温柔的动态平衡（dynamic equilibrium）。
+
+过了很久，罗纳尔多开口，声音被风削得薄薄的："以前我总觉得，我得活成比这一刻更重的东西。"
+
+艾伦偏过头看他："那现在呢？"
+
+罗纳尔多想了想，把手枕到脑后，望着头顶那片逐渐暗下来的穹顶。
+
+"现在我觉得，"他说，"这一刻本身的完整性（integrity），就够了。"
+
+没有掌声（applause），没有压力（pressure），没有非抵达不可的远方。只有两个人，一块草地，和一阵穿堂而过的晚风。
+
+他把眼睛闭上。嘴角那根线，终于松了。`,
+    words: [
+      { word: "low-noise state", definition: "低噪状态" },
+      { word: "respiratory rhythm", definition: "呼吸节律" },
+      { word: "stable structure", definition: "稳定结构" },
+      { word: "dynamic equilibrium", definition: "动态平衡" },
+      { word: "integrity", definition: "完整性" },
+      { word: "applause", definition: "掌声" },
+      { word: "pressure", definition: "压力" },
+    ],
+  },
+};
+
+export function generateNovel(params: GenerateNovelParams): GenerateNovelResult & { usedWords: string[] } {
+  const styleDoc = styleDocs[params.theme] || styleDocs["搞笑"];
+  
+  const allThemeWords = styleDoc.words;
+  const selectedWordSet = new Set(params.selectedWords || allThemeWords.map(w => w.word.toLowerCase()));
+  
+  const selectedWords = allThemeWords.filter(w => selectedWordSet.has(w.word.toLowerCase()));
+
+  let content = styleDoc.content;
+
+  if (params.length === "short") {
+    const paragraphs = content.split("\n\n");
+    content = paragraphs.slice(0, Math.ceil(paragraphs.length / 2)).join("\n\n");
+  }
+
+  return {
+    title: styleDoc.title,
+    content,
+    usedWords: selectedWords.map((w) => w.word),
+  };
+}
+
+export function getNovelThemes(): string[] {
+  return Object.keys(styleDocs);
+}
+
+export function getThemeWords(theme: string): Array<{ word: string; definition: string }> {
+  const styleDoc = styleDocs[theme];
+  return styleDoc ? styleDoc.words : [];
+}
+
+export function parseHighlightedText(text: string): Array<{
+  type: "normal" | "highlight";
+  text: string;
+}> {
+  const parts: Array<{ type: "normal" | "highlight"; text: string }> = [];
+  const regex = /([a-zA-Z][a-zA-Z\s-]*)（([^）]+)）/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: "normal", text: text.slice(lastIndex, match.index) });
+    }
+    parts.push({
+      type: "highlight",
+      text: `${match[1]}（${match[2]}）`,
+    });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: "normal", text: text.slice(lastIndex) });
+  }
+
+  return parts;
+}
