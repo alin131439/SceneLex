@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, CheckCircle, RotateCcw } from "lucide-react";
 import { useLearnStore } from "@/store/learnStore";
 import WordCard from "@/components/WordCard";
-import StoryCard from "@/components/StoryCard";
 import OnboardingGuide from "@/components/OnboardingGuide";
 
 export default function Learn() {
@@ -153,9 +152,8 @@ export default function Learn() {
   }
 
   return (
-    <div className="h-full flex flex-col pb-20">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between px-5 py-4">
+    <div className="h-full flex flex-col pb-20 relative">
+      <div className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-5 py-4">
         <button
           onClick={() => navigate("/")}
           className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-card hover:shadow-card-hover transition-shadow"
@@ -176,9 +174,8 @@ export default function Learn() {
         </button>
       </div>
 
-      {/* Card Stack */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 relative">
-        <div className="relative w-full max-w-[340px] mx-auto" style={{ height: "380px" }}>
+        <div className="relative w-full h-[90vh] max-h-[92vh]">
           <AnimatePresence>
             {visibleWords.map((word, i) => {
               const isTopCard = i === visibleWords.length - 1;
@@ -189,7 +186,7 @@ export default function Learn() {
               return (
                 <motion.div
                   key={word.id}
-                  className="absolute w-full"
+                  className="absolute inset-0 w-full"
                   style={{
                     scale,
                     y: translateY,
@@ -215,32 +212,26 @@ export default function Learn() {
           </AnimatePresence>
         </div>
 
-        {/* Story Card */}
-        {currentWord && (
-          <div className="w-full max-w-[340px] mx-auto mt-4">
-            <StoryCard word={currentWord} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="absolute bottom-24 left-0 right-0 flex items-center justify-center"
+        >
+          <div className="flex items-center gap-6 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-text-secondary text-xs">← 左滑</span>
+              <span className="text-success text-xs font-semibold">已掌握</span>
+            </div>
+            <div className="w-px h-4 bg-gray-300" />
+            <div className="flex items-center gap-2">
+              <span className="text-warning text-xs font-semibold">不认识</span>
+              <span className="text-text-secondary text-xs">右滑 →</span>
+            </div>
           </div>
-        )}
+        </motion.div>
       </div>
 
-      {/* Swipe Hint */}
-      <div className="flex items-center justify-center gap-8 pb-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-success/10 rounded-full flex items-center justify-center">
-            <span className="text-success text-sm">←</span>
-          </div>
-          <span className="text-xs text-text-secondary">认识</span>
-        </div>
-        <div className="w-px h-8 bg-gray-200" />
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-text-secondary">不认识</span>
-          <div className="w-8 h-8 bg-warning/10 rounded-full flex items-center justify-center">
-            <span className="text-warning text-sm">→</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Onboarding Guide */}
       {showOnboarding && (
         <OnboardingGuide
           onComplete={() => {

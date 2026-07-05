@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, BookOpen, RotateCcw, Download, Copy, Check } from "lucide-react";
+import { Sparkles, BookOpen, RotateCcw, Download, Copy, Check, Upload, FileText, Trash2 } from "lucide-react";
 import { useLearnStore } from "@/store/learnStore";
 import { generateNovel, getNovelThemes, getThemeWords, parseHighlightedText } from "@/utils/novelGenerator";
 
@@ -24,6 +24,58 @@ export default function NovelGenerator() {
   const [showWordSelector, setShowWordSelector] = useState(false);
   const [selectedWordNames, setSelectedWordNames] = useState<string[]>([]);
   const [novelImage, setNovelImage] = useState("");
+
+  const [fictionLibrary, setFictionLibrary] = useState<{ id: string; title: string; content: string; date: string }[]>(() => {
+    const saved = localStorage.getItem("fictionLibrary");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [newFictionContent, setNewFictionContent] = useState("");
+  const [newFictionTitle, setNewFictionTitle] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    localStorage.setItem("fictionLibrary", JSON.stringify(fictionLibrary));
+  }, [fictionLibrary]);
+
+  const handlePaste = () => {
+    if (!newFictionContent.trim() || !newFictionTitle.trim()) return;
+    const newFiction = {
+      id: Date.now().toString(),
+      title: newFictionTitle,
+      content: newFictionContent,
+      date: new Date().toLocaleDateString(),
+    };
+    setFictionLibrary((prev) => [newFiction, ...prev]);
+    setNewFictionTitle("");
+    setNewFictionContent("");
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.endsWith(".txt") && !file.name.endsWith(".md")) {
+      alert("只支持 .txt 和 .md 文件");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const title = file.name.replace(/\.(txt|md)$/, "");
+      const newFiction = {
+        id: Date.now().toString(),
+        title,
+        content,
+        date: new Date().toLocaleDateString(),
+      };
+      setFictionLibrary((prev) => [newFiction, ...prev]);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleDelete = (id: string) => {
+    setFictionLibrary((prev) => prev.filter((item) => item.id !== id));
+  };
 
   const themes = getNovelThemes();
   const lengthOptions = [
@@ -240,72 +292,74 @@ export default function NovelGenerator() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 flex flex-col gap-4"
+            className="mt-4"
           >
-            <div className="flex items-center justify-between">
-              <h4 className="font-bold text-text-primary">
-                <BookOpen size={16} className="inline mr-1.5 text-primary-500" />
-                {generatedTitle}
-              </h4>
-              <div className="flex gap-1">
-                <button
-                  onClick={handleCopy}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface hover:bg-gray-200 transition-colors"
-                >
-                  <Copy size={14} />
-                </button>
-                <button
-                  onClick={handleGenerate}
-                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface hover:bg-gray-200 transition-colors"
-                >
-                  <RotateCcw size={14} />
-                </button>
-              </div>
-            </div>
-
-            {novelImage && (
-              <div className="w-full h-[30vh] bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center">
+            <div className="relative w-full h-[70vh] min-h-[500px] rounded-2xl overflow-hidden shadow-lg">
+              {novelImage && (
                 <img
                   src={novelImage}
                   alt=""
-                  className="max-w-full max-h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
                 />
-              </div>
-            )}
+              )}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+              
+              <div className="absolute inset-0 flex flex-col p-6 md:p-8 lg:p-12 overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="font-bold text-xl md:text-2xl text-white drop-shadow-lg">
+                    <BookOpen size={20} className="inline mr-2 text-primary-400" />
+                    {generatedTitle}
+                  </h4>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCopy}
+                      className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors text-white"
+                    >
+                      <Copy size={16} />
+                    </button>
+                    <button
+                      onClick={handleGenerate}
+                      className="w-9 h-9 flex items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors text-white"
+                    >
+                      <RotateCcw size={16} />
+                    </button>
+                  </div>
+                </div>
 
-            <div className="flex-1 min-h-[30vh] max-h-[calc(100vh-450px)] overflow-y-auto bg-surface rounded-2xl p-4">
-              <div className="space-y-4">
-                {generatedContent.split("\n\n").map((paragraph, pIndex) => (
-                  <p key={pIndex} className="text-sm text-text-primary leading-relaxed">
-                    {parseHighlightedText(paragraph).map((part, i) =>
-                      part.type === "highlight" ? (
-                        <span
-                          key={i}
-                          className="font-bold text-primary-500 bg-primary-50 px-1 rounded"
-                        >
-                          {part.text}
-                        </span>
-                      ) : (
-                        <span key={i}>{part.text}</span>
-                      )
-                    )}
-                  </p>
-                ))}
-              </div>
-            </div>
+                <div className="flex-1 space-y-6">
+                  {generatedContent.split("\n\n").map((paragraph, pIndex) => (
+                    <p key={pIndex} className="text-base md:text-lg text-white leading-relaxed drop-shadow-md">
+                      {parseHighlightedText(paragraph).map((part, i) =>
+                        part.type === "highlight" ? (
+                          <span
+                            key={i}
+                            className="font-bold text-primary-300 bg-white/20 px-2 py-0.5 rounded backdrop-blur-sm"
+                          >
+                            {part.text}
+                          </span>
+                        ) : (
+                          <span key={i}>{part.text}</span>
+                        )
+                      )}
+                    </p>
+                  ))}
+                </div>
 
-            <div className="flex flex-wrap gap-1.5">
-              {usedWords.map((word) => (
-                <span
-                  key={word}
-                  className="px-2 py-0.5 bg-primary-50 text-primary-600 rounded-full text-xs font-medium"
-                >
-                  {word}
-                </span>
-              ))}
-              <span className="px-2 py-0.5 bg-surface text-text-secondary rounded-full text-xs">
-                共 {usedWords.length} 个词汇
-              </span>
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {usedWords.map((word) => (
+                    <span
+                      key={word}
+                      className="px-3 py-1 bg-primary-500/80 text-white rounded-full text-sm font-medium backdrop-blur-sm"
+                    >
+                      {word}
+                    </span>
+                  ))}
+                  <span className="px-3 py-1 bg-white/20 text-white rounded-full text-sm backdrop-blur-sm">
+                    共 {usedWords.length} 个词汇
+                  </span>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -333,6 +387,85 @@ export default function NovelGenerator() {
           </div>
         </div>
       )}
+
+      <div className="bg-white rounded-2xl shadow-card p-4 max-w-2xl mx-auto mt-4">
+        <div className="flex items-center gap-2 mb-3">
+          <FileText size={16} className="text-purple-500" />
+          <h3 className="font-semibold text-sm text-text-primary">同人文上传</h3>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <input
+              type="text"
+              placeholder="输入同人文标题"
+              value={newFictionTitle}
+              onChange={(e) => setNewFictionTitle(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+            />
+          </div>
+
+          <div>
+            <textarea
+              placeholder="粘贴同人文内容..."
+              value={newFictionContent}
+              onChange={(e) => setNewFictionContent(e.target.value)}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all resize-none"
+              style={{ maxHeight: "120px", overflowY: "auto" }}
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-text-primary rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors"
+            >
+              <Upload size={14} />
+              上传文件
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,.md"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <button
+              onClick={handlePaste}
+              disabled={!newFictionContent.trim() || !newFictionTitle.trim()}
+              className="flex-1 px-4 py-2.5 bg-primary-500 text-white rounded-xl text-sm font-medium hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              保存同人文
+            </button>
+          </div>
+        </div>
+
+        {fictionLibrary.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <h4 className="text-xs text-text-secondary mb-2">我的同人文库</h4>
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {fictionLibrary.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-2 bg-gray-50 rounded-xl"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-medium text-text-primary truncate">{item.title}</div>
+                    <div className="text-[10px] text-text-secondary">{item.date}</div>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-red-100 text-red-500 transition-colors"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { wordBanks } from "@/data/wordBanks";
 import ProgressBar from "@/components/ProgressBar";
 import ReviewPrompt from "@/components/ReviewPrompt";
 import WordBankSelector from "@/components/WordBankSelector";
+import CompanionBanner from "@/components/CompanionBanner";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -27,28 +28,24 @@ export default function Home() {
   return (
     <div className="h-full overflow-y-auto pb-20">
       <div className="max-w-lg mx-auto px-5 pt-10">
-        {/* Greeting + Bank Selector */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <p className="text-text-secondary text-sm mb-1">你好</p>
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-text-primary">
-              {getGreeting()}，
-              <span className="text-primary-500">继续加油</span>
-            </h1>
-            <button
-              onClick={() => setShowBankSelector(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-card text-xs font-medium text-text-primary hover:shadow-card-hover transition-all"
-            >
-              <Library size={14} className="text-primary-500" />
-              <span className="max-w-[80px] truncate">{currentBank?.name || "选择词库"}</span>
-              <ChevronDown size={12} className="text-text-secondary" />
-            </button>
-          </div>
-        </motion.div>
+        <div className="flex items-center justify-between mb-2">
+          <h1 
+            className="text-lg font-bold tracking-[0.3em] bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent"
+            style={{ textShadow: "0 0 20px rgba(59, 130, 246, 0.3)" }}
+          >
+            SCENELEX
+          </h1>
+          <button
+            onClick={() => setShowBankSelector(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl shadow-card text-xs font-medium text-text-primary hover:shadow-card-hover transition-all"
+          >
+            <Library size={14} className="text-primary-500" />
+            <span className="max-w-[80px] truncate">{currentBank?.name || "选择词库"}</span>
+            <ChevronDown size={12} className="text-text-secondary" />
+          </button>
+        </div>
+
+        <CompanionBanner />
 
         {/* Ebbinghaus Review Prompt */}
         <div className="mt-4">

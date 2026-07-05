@@ -22,44 +22,36 @@ export default function StoryCard({ word }: StoryCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.5 }}
-      className="bg-white rounded-2xl shadow-card border border-primary-100 overflow-hidden flex flex-col"
+      className="relative w-full h-[200px] rounded-2xl shadow-card overflow-hidden"
+      style={{
+        backgroundImage: randomImage ? `url(${randomImage})` : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
     >
-      {/* Header */}
-      <div className="bg-primary-50 px-5 py-3 flex items-center gap-2">
-        <BookOpen size={16} className="text-primary-500" />
-        <span className="text-sm font-semibold text-primary-600">
-          小说记忆 · {word.story.title}
-        </span>
-      </div>
+      <div className="absolute inset-0 bg-black/50" />
 
-      {/* Image */}
-      {randomImage && (
-        <div className="w-full h-[28vh] bg-gray-100 flex items-center justify-center">
-          <img
-            src={randomImage}
-            alt=""
-            className="max-w-full max-h-full object-contain"
-          />
-        </div>
-      )}
-
-      {/* Story content - scrollable */}
-      <div className="flex-1 min-h-[150px] max-h-[calc(100vh-400px)] overflow-y-auto px-5 py-4">
-        {/* Word */}
-        <div className="mb-4">
-          <span className="text-2xl font-bold text-text-primary">{word.word}</span>
-          <span className="text-sm text-text-secondary ml-2">{word.definition}</span>
+      <div className="absolute inset-0 flex flex-col p-4 overflow-y-auto">
+        <div className="flex items-center gap-2 mb-3">
+          <BookOpen size={14} className="text-primary-400" />
+          <span className="text-xs font-semibold text-white/90">
+            小说记忆 · {word.story.title}
+          </span>
         </div>
 
-        {/* English Example */}
         <div className="mb-3">
-          <p className="text-xs text-text-secondary mb-1">英文例句</p>
-          <p className="text-sm text-text-primary leading-relaxed">
+          <span className="text-xl font-bold text-white">{word.word}</span>
+          <span className="text-xs text-white/70 ml-2">{word.definition}</span>
+        </div>
+
+        <div className="mb-2">
+          <p className="text-[10px] text-white/60 mb-1">英文例句</p>
+          <p className="text-xs text-white/90 leading-relaxed">
             {word.story.content.split(new RegExp(`(${word.word})`, "gi")).map((part, i) =>
               part.toLowerCase() === word.word.toLowerCase() ? (
                 <span
                   key={i}
-                  className="font-bold text-primary-500 bg-primary-50 px-1 rounded"
+                  className="font-bold text-primary-300 bg-white/20 px-1 rounded"
                 >
                   {part}
                 </span>
@@ -70,10 +62,9 @@ export default function StoryCard({ word }: StoryCardProps) {
           </p>
         </div>
 
-        {/* Chinese Translation */}
-        <div className="mt-3 pt-3 border-t border-gray-100">
-          <p className="text-xs text-text-secondary mb-1">中文翻译</p>
-          <p className="text-sm text-text-secondary leading-relaxed">
+        <div className="pt-2 border-t border-white/10">
+          <p className="text-[10px] text-white/60 mb-1">中文翻译</p>
+          <p className="text-xs text-white/70 leading-relaxed">
             {word.story.translation}
           </p>
         </div>
