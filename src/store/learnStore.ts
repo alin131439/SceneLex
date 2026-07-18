@@ -49,6 +49,7 @@ interface LearnState {
   // --- Actions ---
   markMastered: (wordId: string) => void;
   markReview: (wordId: string) => void;
+  recordAnswer: (wordId: string, result: "mastered" | "review") => void;
   nextWord: () => void;
   resetProgress: () => void;
 
@@ -139,6 +140,22 @@ export const useLearnStore = create<LearnState>()(
             review: [...state.review, wordId],
             dailyCompleted: state.dailyCompleted + 1,
             weeklyProgress: newWeekly,
+          };
+        }),
+
+      recordAnswer: (wordId: string, result: "mastered" | "review") =>
+        set((state) => {
+          const newWeekly = [...state.weeklyProgress];
+          newWeekly[newWeekly.length - 1] += 1;
+          const hasRecord = state.ebbinghausRecords.some((record) => record.wordId === wordId);
+
+          return {
+            [result]: [...state[result], wordId],
+            dailyCompleted: state.dailyCompleted + 1,
+            weeklyProgress: newWeekly,
+            ebbinghausRecords: hasRecord
+              ? state.ebbinghausRecords
+              : [...state.ebbinghausRecords, createEbbinghausRecord(wordId)],
           };
         }),
 

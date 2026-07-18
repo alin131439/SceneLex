@@ -6,9 +6,10 @@ import type { Word } from "@/data/words";
 const images = import.meta.glob("../assets/images/*.{jpg,jpeg,png,gif,webp}", { eager: true });
 const imagePaths = Object.values(images).map((img: any) => img.default);
 
-function getRandomImage(): string {
+function getImageForWord(wordId: string): string {
   if (imagePaths.length === 0) return "";
-  return imagePaths[Math.floor(Math.random() * imagePaths.length)];
+  const hash = Array.from(wordId).reduce((total, character) => total + character.charCodeAt(0), 0);
+  return imagePaths[hash % imagePaths.length];
 }
 
 interface WordCardProps {
@@ -28,9 +29,8 @@ export default function WordCard({
   zIndex,
 }: WordCardProps) {
   const x = useMotionValue(0);
-  const y = useMotionValue(0);
   const isDragging = useRef(false);
-  const randomImage = getRandomImage();
+  const backgroundImage = getImageForWord(word.id);
 
   const rotate = useTransform(x, [-300, 0, 300], [-15, 0, 15]);
 
@@ -61,23 +61,38 @@ export default function WordCard({
     }
   };
 
+  if (!isTop) {
+    return (
+      <div
+        className="absolute w-full h-full rounded-3xl shadow-card overflow-hidden pointer-events-none"
+        style={{
+          zIndex,
+          backgroundImage: backgroundImage
+            ? `linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url(${backgroundImage})`
+            : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+    );
+  }
+
   return (
     <motion.div
       className="absolute w-full flex items-center justify-center"
       style={{
-        x: isTop ? x : 0,
-        y: isTop ? y : 0,
-        rotate: isTop ? rotate : 0,
+        x,
+        rotate,
         zIndex,
-        cursor: isTop ? "grab" : "default",
+        cursor: "grab",
       }}
-      drag={isTop ? "x" : false}
+      drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.9}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onClick={handleClick}
-      whileTap={isTop ? { cursor: "grabbing" } : {}}
+      whileTap={{ cursor: "grabbing" }}
       initial={{ scale: 0.92, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.5, opacity: 0 }}
@@ -86,7 +101,7 @@ export default function WordCard({
       <motion.div
         className="w-full max-w-[360px] h-[90vh] max-h-[92vh] rounded-3xl shadow-card overflow-hidden mx-auto relative"
         style={{
-          backgroundImage: randomImage ? `url(${randomImage})` : undefined,
+          backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -189,16 +204,14 @@ export default function WordCard({
 
         <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-4 px-6 py-6 bg-gradient-to-t from-black/80 to-transparent">
           <button
-            onClick={() => isTop && onSwipe("left")}
-            disabled={!isTop}
+            onClick={() => onSwipe("left")}
             className="flex items-center gap-2 px-8 py-4 bg-success/90 text-white rounded-2xl font-semibold shadow-lg hover:bg-success disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <Check size={20} />
             认识
           </button>
           <button
-            onClick={() => isTop && onSwipe("right")}
-            disabled={!isTop}
+            onClick={() => onSwipe("right")}
             className="flex items-center gap-2 px-8 py-4 bg-warning/90 text-white rounded-2xl font-semibold shadow-lg hover:bg-warning disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <X size={20} />

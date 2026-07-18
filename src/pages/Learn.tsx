@@ -16,11 +16,9 @@ export default function Learn() {
     dailyGoal,
     dailyCompleted,
     hasSeenOnboarding,
-    markMastered,
-    markReview,
+    recordAnswer,
     nextWord,
     resetProgress,
-    addToEbbinghaus,
     completeOnboarding,
     resetOnboarding,
     recordStudyTime,
@@ -59,20 +57,19 @@ export default function Learn() {
 
       if (direction === "left") {
         // 左滑 = 认识
-        markMastered(currentWord.id);
+        recordAnswer(currentWord.id, "mastered");
       } else {
         // 右滑 = 不认识
-        markReview(currentWord.id);
+        recordAnswer(currentWord.id, "review");
       }
       // 加入艾宾浩斯复习计划
-      addToEbbinghaus(currentWord.id);
 
       setTimeout(() => {
         nextWord();
         setAnimatingOut(false);
       }, 300);
     },
-    [animatingOut, currentWord, markMastered, markReview, addToEbbinghaus, nextWord]
+    [animatingOut, currentWord, recordAnswer, nextWord]
   );
 
   const handleTap = useCallback(() => {
